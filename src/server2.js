@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const Report = require('/Users/alessiogandelli/dev/cantiere/trashbuddy_api/models/report.js');
+const Report = require('./report.js');
 
 const path = require('path')
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') })

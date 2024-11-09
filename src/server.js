@@ -4,7 +4,7 @@ require('dotenv').config({ path: path.resolve(__dirname, '../.env') })
 const express = require('express');
 const multer = require('multer');
 const mongoose = require('mongoose');
-const Report = require('/Users/alessiogandelli/dev/cantiere/trashbuddy_api/models/report.js');
+const Report = require('./report.js');
 
 const app = express();
 const PORT = process.env.PORT || 1234;
