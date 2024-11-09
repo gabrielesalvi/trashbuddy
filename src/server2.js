@@ -165,7 +165,7 @@ app.get('/reports', async (req, res) => {
             const reportObj = report.toObject();
             // Convert relative image path to full URL
             if (reportObj.imageUrl) {
-                reportObj.imageUrl = `${req.protocol}://${req.get('host')}${reportObj.imageUrl}`;
+                reportObj.imageUrl = `https://api.dev.studybuddy.it/trash/uploads/${reportObj.imageUrl}`;
             }
             return reportObj;
         });
