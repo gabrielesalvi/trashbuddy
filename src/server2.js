@@ -109,7 +109,7 @@ app.post('/reports', (req, res) => {
 
             const report = new Report(reportData);
             await report.save();
-            report.type = readImage(reportData.imageUrl, 'in this picture is ther trash? if yes what? is it heavy?')
+            report.type = readImage(reportData.imageUrl, 'in this picture is there trash? if yes what kind? is it heavy?')
 
             console.log("ai dice:", report.type);
             res.status(201).json(report);
@@ -141,7 +141,7 @@ async function readImage(photoUrl, caption){
                       type: "image_url",
                       image_url: {
                           "url": 'https://dev.api.studybuddy.it/trash'+ photoUrl,
-                          "detail": "low"
+                          "detail": "high"
                       },
                   },
               ],
