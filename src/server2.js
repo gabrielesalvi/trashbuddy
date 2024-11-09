@@ -109,9 +109,9 @@ app.post('/reports', (req, res) => {
 
             const report = new Report(reportData);
             await report.save();
-            report.type = readImage(reportData.imageUrl, 'in this picture is there trash? if yes what kind? is it heavy?')
+            const ai_response = await readImage(reportData.imageUrl, 'in this picture is there trash? if yes what kind? is it heavy?')
 
-            console.log("ai dice:", report.type);
+            console.log("ai dice:", ai_response);
             res.status(201).json(report);
         } catch (error) {
             // Clean up uploaded file if database save fails
