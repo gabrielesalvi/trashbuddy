@@ -4,7 +4,16 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const Report = require('./report.js');
+const { OpenAI } = require('openai');
+
+
+
+
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+
+const client = new OpenAI({
+    apiKey: process.env['OPENAI_API_KEY'], // This is the default and can be omitted
+  });
 
 const app = express();
 const port = 1234;
@@ -93,6 +102,11 @@ app.post('/reports', (req, res) => {
                 status: 'open'
             };
 
+            reportData.type = readImage(reportData.imageUrl, 'in this picture is ther trash? if yes what? is it heavy?')
+
+            console.log("ai dice:", reportData.description);
+
+
             console.log('Creating report:', reportData);
 
             const report = new Report(reportData);
@@ -112,6 +126,30 @@ app.post('/reports', (req, res) => {
         }
     });
 });
+
+async function readImage(photoUrl, caption){
+
+    const response = await client.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+          {
+              role: "user",
+              content: [
+                  { type: "text", text: caption },
+                  {
+                      type: "image_url",
+                      image_url: {
+                          "url": photoUrl,
+                          "detail": "low"
+                      },
+                  },
+              ],
+          },
+      ],
+  })
+    
+      return response.choices[0].message.content ?? "";
+  }
 
 // Get all reports
 // Get all reports

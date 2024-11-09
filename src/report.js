@@ -14,8 +14,6 @@ const reportSchema = new mongoose.Schema({
   },
   type: { 
     type: String, 
-    enum: ['plastic', 'paper', 'glass', 'organic', 'other', 'hazardous', 'bulky'],
-    default: 'other'
   },
   address: String,
   timestamp: { type: Date, default: Date.now }
