@@ -96,7 +96,7 @@ app.post('/reports', (req, res) => {
                     longitude: parseFloat(req.body.longitude)
                 },
                 address: req.body.address,
-                imageUrl: `/trash/uploads/${req.file.filename}`,
+                imageUrl: `/uploads/${req.file.filename}`,
                 description: req.body.description || '',
                 type: req.body.type || 'other',
                 status: 'open'
@@ -139,7 +139,7 @@ async function readImage(photoUrl, caption){
                   {
                       type: "image_url",
                       image_url: {
-                          "url": 'https://dev.api.studybuddy.it/trash/'+ photoUrl,
+                          "url": 'https://dev.api.studybuddy.it/trash'+ photoUrl,
                           "detail": "low"
                       },
                   },
