@@ -9,6 +9,17 @@ const reportSchema = new mongoose.Schema({
   imageUrl: String,      // Salva path locale o URL dell’immagine
 
   description: String,   // Descrizione facoltativa della segnalazione
+
+  status: { 
+    type: String, 
+    enum: ['open', 'closed'], // Definisce lo stato della segnalazione
+    default: 'open' 
+  },
+
+  type: { 
+    type: String, 
+    enum: ['plastic', 'paper', 'glass', 'organic', 'other', 'hazardous', 'bulky'], // Tipi di rifiuti
+  },
   
   timestamp: { type: Date, default: Date.now }
 });

@@ -1,20 +1,15 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const multer = require('multer');
+const mongoose = require('mongoose');
 const Report = require('./models/report');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// MongoDB configuration
-mongoose.connect('mongodb://localhost:27017/trashbuddy_db', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log("Connesso a MongoDB"))
-.catch((err) => console.error("Errore di connessione a MongoDB:", err));
+// Middleware per parsing del JSON, applicato prima di altre rotte
+app.use(express.json());  // JSON middleware prima delle rotte
 
-// multer image uploader configuration
+// Configurazione multer per l'upload delle immagini
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/');
@@ -25,19 +20,23 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-// Middleware per parsing del JSON
-app.use(express.json());
-
 // Endpoint per creare una segnalazione
 app.post('/reports', upload.single('image'), async (req, res) => {
+
+  console.log("Body della richiesta:", req.body);  // Log dei dati JSON
+  console.log("File caricato:", req.file);        // Log del file caricato (se presente)
+  
   try {
-    const { latitude, longitude } = req.body;
-    // const imageUrl = req.file ? req.file.path : null;
+    const { latitude, longitude, description, status, type } = req.body;
+    const imageUrl = req.file ? req.file.path : null;
 
     // Crea e salva la segnalazione
     const report = new Report({
       location: { latitude, longitude },
-      // imageUrl
+      imageUrl,
+      description,
+      status,
+      type
     });
 
     await report.save();
@@ -52,7 +51,7 @@ app.post('/reports', upload.single('image'), async (req, res) => {
 // Endpoint per ottenere tutte le segnalazioni
 app.get('/reports', async (req, res) => {
   try {
-    const reports = await report.find();
+    const reports = await Report.find();  // Usa il nome corretto del modello 'Report'
     res.status(200).json(reports);
   } catch (error) {
     console.error("Errore nel recupero delle segnalazioni:", error);
@@ -60,6 +59,12 @@ app.get('/reports', async (req, res) => {
   }
 });
 
-app.listen(3000, () => {
-  console.log(`Server avviato su http://localhost:3000`);
+// Connessione a MongoDB
+mongoose.connect('mongodb://localhost:27017/trashbuddy_api', { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log("Connesso a MongoDB"))
+  .catch((err) => console.error("Errore di connessione a MongoDB:", err));
+
+app.listen(PORT, () => {
+  console.log(`Server è in esecuzione sulla porta ${PORT}`);
 });
+
