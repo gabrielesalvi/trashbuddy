@@ -69,14 +69,13 @@ mongoose.connect(process.env.MONGODB_URI, {
 // Create a new report with image
 app.post('/reports', (req, res) => {
     upload.single('image')(req, res, async (err) => {
+        // Error handling for Multer
         if (err instanceof multer.MulterError) {
-            // Handle Multer errors
             return res.status(400).json({
                 error: 'Upload error',
                 details: err.message
             });
         } else if (err) {
-            // Handle other errors
             return res.status(500).json({
                 error: 'Server error',
                 details: err.message
@@ -102,25 +101,28 @@ app.post('/reports', (req, res) => {
                 status: 'open'
             };
 
-
-
-
             console.log('Creating report:', reportData);
 
             const report = new Report(reportData);
             await report.save();
+            
             const ai_response = await readImage(reportData.imageUrl, 'in this picture is there trash? if yes what kind? is it heavy, if it is heavy the first word of the response should be <heavy>?, the second should be <trash> and the third should be <yes> or <no> depending on the presence of trash, the fourth should be <type> and the fifth should be the type of trash, if it is not heavy the first word should be <light> and the rest the same');
+            
+            // Save the updated report with AI response
             report.type = ai_response;
+            await report.save();  // Add this line to save the updated type
+            
             console.log("ai dice:", report);
             return res.status(201).json(report);
+            
         } catch (error) {
             // Clean up uploaded file if database save fails
             if (req.file) {
-                fs.unlink(req.file.path, (unlinkError) => {
-                    if (unlinkError) console.error('Error deleting file:', unlinkError);
+                await fs.promises.unlink(req.file.path).catch(unlinkError => {
+                    console.error('Error deleting file:', unlinkError);
                 });
             }
-            res.status(400).json({
+            return res.status(400).json({  // Add return statement
                 error: 'Failed to create report',
                 details: error.message
             });
