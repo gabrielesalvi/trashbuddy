@@ -139,7 +139,7 @@ async function readImage(photoUrl, caption){
                   {
                       type: "image_url",
                       image_url: {
-                          "url": photoUrl,
+                          "url": 'https://dev.api.studybuddy.it/trash/'+ photoUrl,
                           "detail": "low"
                       },
                   },
