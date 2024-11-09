@@ -13,7 +13,7 @@ require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 const client = new OpenAI({
     apiKey: process.env['OPENAI_API_KEY'], // This is the default and can be omitted
-  });
+});
 
 const app = express();
 const port = 1234;
@@ -59,12 +59,12 @@ app.use(express.json());
 app.use('/uploads', express.static(uploadDir));
 
 // MongoDB connection
-mongoose.connect(process.env.MONGODB_URI, { 
-    useNewUrlParser: true, 
-    useUnifiedTopology: true 
+mongoose.connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
 })
-.then(() => console.log('MongoDB connected'))
-.catch(err => console.error('MongoDB connection error:', err));
+    .then(() => console.log('MongoDB connected'))
+    .catch(err => console.error('MongoDB connection error:', err));
 
 // Create a new report with image
 app.post('/reports', (req, res) => {
@@ -102,7 +102,7 @@ app.post('/reports', (req, res) => {
                 status: 'open'
             };
 
-            
+
 
 
             console.log('Creating report:', reportData);
@@ -110,9 +110,9 @@ app.post('/reports', (req, res) => {
             const report = new Report(reportData);
             await report.save();
             const ai_response = await readImage(reportData.imageUrl, 'in this picture is there trash? if yes what kind? is it heavy, if it is heavy the first word of the response should be <heavy>?, the second should be <trash> and the third should be <yes> or <no> depending on the presence of trash, the fourth should be <type> and the fifth should be the type of trash, if it is not heavy the first word should be <light> and the rest the same');
-
-            console.log("ai dice:", ai_response);
-            res.status(201).json(report);
+            report.type = ai_response;
+            console.log("ai dice:", report);
+            return res.status(201).json(report);
         } catch (error) {
             // Clean up uploaded file if database save fails
             if (req.file) {
@@ -128,36 +128,36 @@ app.post('/reports', (req, res) => {
     });
 });
 
-async function readImage(photoUrl, caption){
+async function readImage(photoUrl, caption) {
 
     const response = await client.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-          {
-              role: "user",
-              content: [
-                  { type: "text", text: caption },
-                  {
-                      type: "image_url",
-                      image_url: {
-                          "url": 'https://dev.api.studybuddy.it/trash'+ photoUrl,
-                          "detail": "high"
-                      },
-                  },
-              ],
-          },
-      ],
-  })
-    
-      return response.choices[0].message.content ?? "";
-  }
+        model: "gpt-4o-mini",
+        messages: [
+            {
+                role: "user",
+                content: [
+                    { type: "text", text: caption },
+                    {
+                        type: "image_url",
+                        image_url: {
+                            "url": 'https://dev.api.studybuddy.it/trash' + photoUrl,
+                            "detail": "high"
+                        },
+                    },
+                ],
+            },
+        ],
+    })
+
+    return response.choices[0].message.content ?? "";
+}
 
 // Get all reports
 // Get all reports
 app.get('/reports', async (req, res) => {
     try {
         const reports = await Report.find().sort({ timestamp: -1 });
-        
+
         // Transform reports to include full image URLs
         const reportsWithImages = reports.map(report => {
             const reportObj = report.toObject();
@@ -182,14 +182,14 @@ app.get('/uploads/:filename', (req, res) => {
     try {
         const filename = req.params.filename;
         const imagePath = path.join(__dirname, 'uploads', filename);
-        
+
         // Check if file exists
         if (!fs.existsSync(imagePath)) {
             return res.status(404).json({
                 error: 'Image not found'
             });
         }
-        
+
         // Send the image file
         res.sendFile(imagePath);
     } catch (error) {
