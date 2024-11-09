@@ -1,72 +1,59 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
-const Report = require('./report.js');
-
-const path = require('path')
-require('dotenv').config({ path: path.resolve(__dirname, '../.env') })
-
+const multer = require('multer');
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 const app = express();
 const port = 1234;
 
-app.use(bodyParser.json());
-
-mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(() => console.log('MongoDB connected'))
-    .catch(err => console.error(err));
-
-// Create a new report
-app.post('/reports', async (req, res) => {
-    console.log("Request body:", req.body);
-    try {
-        const report = new Report(req.body);
-        console.log("Report:", report);
-        await report.save();
-        res.status(201).send(report);
-    } catch (error) {
-        res.status(400).send(error);
-    }
+// Configure multer for image upload
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/');
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname));
+  }
 });
 
-// Read all reports
-app.get('/reports', async (req, res) => {
-    try {
-        const reports = await Report.find();
-        res.status(200).send(reports);
-    } catch (error) {
-        res.status(500).send(error);
+const upload = multer({ 
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Not an image! Please upload an image.'), false);
     }
+  }
 });
 
-// Read a single report by ID
-app.get('/reports/:id', async (req, res) => {
-    try {
-        const report = await Report.findById(req.params.id);
-        if (!report) {
-            return res.status(404).send();
-        }
-        res.status(200).send(report);
-    } catch (error) {
-        res.status(500).send(error);
-    }
-});
+app.use('/uploads', express.static('uploads'));
+app.use(express.json());
 
+// Modified POST endpoint to handle multipart form data
+app.post('/reports', upload.single('image'), async (req, res) => {
+  try {
+    const reportData = {
+      location: {
+        latitude: parseFloat(req.body.latitude),
+        longitude: parseFloat(req.body.longitude)
+      },
+      imageUrl: req.file ? `/uploads/${req.file.filename}` : null,
+      description: req.body.description || '',
+      type: req.body.type || 'other',
+      status: 'open',
+      address: req.body.address
+    };
 
-
-// Delete a report by ID
-app.delete('/reports/:id', async (req, res) => {
-    try {
-        const report = await Report.findByIdAndDelete(req.params.id);
-        if (!report) {
-            return res.status(404).send();
-        }
-        res.status(200).send(report);
-    } catch (error) {
-        res.status(500).send(error);
-    }
-});
-
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+    const report = new Report(reportData);
+    await report.save();
+    res.status(201).send(report);
+  } catch (error) {
+    console.error('Error creating report:', error);
+    res.status(400).send(error);
+  }
 });

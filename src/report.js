@@ -5,22 +5,19 @@ const reportSchema = new mongoose.Schema({
     latitude: Number,
     longitude: Number
   },
-
-  imageUrl: String,      // Salva path locale o URL dell’immagine
-
-  description: String,   // Descrizione facoltativa della segnalazione
-
+  imageUrl: String,
+  description: String,
   status: { 
     type: String, 
-    enum: ['open', 'closed'], // Definisce lo stato della segnalazione
+    enum: ['open', 'closed'],
     default: 'open' 
   },
-
   type: { 
     type: String, 
-    enum: ['plastic', 'paper', 'glass', 'organic', 'other', 'hazardous', 'bulky'], // Tipi di rifiuti
+    enum: ['plastic', 'paper', 'glass', 'organic', 'other', 'hazardous', 'bulky'],
+    default: 'other'
   },
-  
+  address: String,
   timestamp: { type: Date, default: Date.now }
 });
 
