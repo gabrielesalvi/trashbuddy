@@ -102,15 +102,16 @@ app.post('/reports', (req, res) => {
                 status: 'open'
             };
 
-            reportData.type = readImage(reportData.imageUrl, 'in this picture is ther trash? if yes what? is it heavy?')
-
-            console.log("ai dice:", reportData.description);
+            
 
 
             console.log('Creating report:', reportData);
 
             const report = new Report(reportData);
             await report.save();
+            report.type = readImage(reportData.imageUrl, 'in this picture is ther trash? if yes what? is it heavy?')
+
+            console.log("ai dice:", report.type);
             res.status(201).json(report);
         } catch (error) {
             // Clean up uploaded file if database save fails
