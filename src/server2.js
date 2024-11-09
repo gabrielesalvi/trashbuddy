@@ -109,7 +109,7 @@ app.post('/reports', (req, res) => {
 
             const report = new Report(reportData);
             await report.save();
-            const ai_response = await readImage(reportData.imageUrl, 'in this picture is there trash? if yes what kind? is it heavy?')
+            const ai_response = await readImage(reportData.imageUrl, 'in this picture is there trash? if yes what kind? is it heavy, if it is heavy the first word of the response should be <heavy>?, the second should be <trash> and the third should be <yes> or <no> depending on the presence of trash, the fourth should be <type> and the fifth should be the type of trash, if it is not heavy the first word should be <light> and the rest the same');
 
             console.log("ai dice:", ai_response);
             res.status(201).json(report);
