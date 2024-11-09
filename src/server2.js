@@ -87,7 +87,7 @@ app.post('/reports', (req, res) => {
                     longitude: parseFloat(req.body.longitude)
                 },
                 address: req.body.address,
-                imageUrl: `/uploads/${req.file.filename}`,
+                imageUrl: `/trash/uploads/${req.file.filename}`,
                 description: req.body.description || '',
                 type: req.body.type || 'other',
                 status: 'open'
